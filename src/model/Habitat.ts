@@ -1,30 +1,35 @@
 import { Animal } from "./Animal";
 
-class Habitat {
+export class Habitat {
 
     private nome: string;
-    private lista_de_animais: Animal;
+    private listaAnimais: Array<Animal>;
 
-    constructor(_nome: string,
-        _lista_de_animais: Animal,) {
-      this.nome = _nome;
-      this.lista_de_animais = _lista_de_animais;
+    constructor(_nome: string, _listaAnimais: Array<Animal>,) {
+        this.nome = _nome;
+        this.listaAnimais = _listaAnimais;
     }
 
-    public setNome(nome: string): void {
-        this.nome = nome
+     // Método setter para atualizar o valor da propriedade 'nome'
+     public setNome(novoNome: string): void {
+        this.nome = novoNome;
     }
 
+    // Método getter para recuperar o valor da propriedade 'nome'
     public getNome(): string {
-        return this.nome
+        return this.nome;
     }
 
-    public setlista_de_animais(lista_de_animais: Animal): void {
-        this.lista_de_animais = lista_de_animais
+    // Método setter para modificar a lista de animais associada a esta instância
+    public setListaAnimais(novaLista: Array<Animal>): void {
+        this.listaAnimais = novaLista;
     }
 
-    public getlista_de_animais(): Animal {
-        return this.lista_de_animais
+    // Método getter para obter a lista de animais associada a esta instância
+    public getListaAnimais(): Array<Animal> {
+        return this.listaAnimais;
     }
-
 }
+
+
+
