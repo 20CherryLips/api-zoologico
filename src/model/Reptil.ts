@@ -1,43 +1,85 @@
-// Importa a classe Animal do módulo "./Animal"
+import { globalAgent } from "http";
 import { Animal } from "./Animal";
+import { DatabaseModel } from "./DatabaseModel";
+
+const database = new DatabaseModel().pool;
 
 /**
- * Classe que representa um réptil, estendendo a classe Animal.
+ * Representa um réptil no zoológico, que é uma subclasse de Animal.
  */
 export class Reptil extends Animal {
-
-    // Propriedade privada para armazenar o tipo de escama do réptil
-    private tipo_de_escama: string;
+    /**
+     * O tipo de escamas do réptil.
+     */
+    private tipo_escamas: string;
 
     /**
-     * Construtor da classe Reptil.
-     * @param _nome - O nome do réptil.
-     * @param _idade - A idade do réptil.
-     * @param _genero - O gênero do réptil.
-     * @param _tipo_de_escama - O tipo de escama do réptil.
+     * Cria uma nova instância de Reptil.
+     * 
+     * @param _nome O nome do réptil.
+     * @param _idade A idade do réptil.
+     * @param _genero O gênero do réptil.
+     * @param _tipo_escamas O tipo de escamas do réptil.
      */
-    constructor(_nome: string, _idade: number, _genero: string, _tipo_de_escama: string) {
-        // Chama o construtor da classe pai (Animal) passando os parâmetros correspondentes
+    constructor(_nome: string, 
+                _idade: number, 
+                _genero: string, 
+                _tipo_escamas: string) {
         super(_nome, _idade, _genero);
-        // Inicializa a propriedade tipo_de_escama com o valor passado como parâmetro
-        this.tipo_de_escama = _tipo_de_escama;
+        this.tipo_escamas = _tipo_escamas;
     }
 
     /**
-     * Define o tipo de escama do réptil.
-     * @param tipo_de_escama - O novo tipo de escama a ser atribuído ao réptil.
+     * Obtém o tipo de escamas do réptil.
+     * 
+     * @returns O tipo de escamas do réptil.
      */
-    public setTipo_de_escama(tipo_de_escama: string): void {
-        // Atribui o novo valor do tipo de escama à propriedade 'tipo_de_escama'
-        this.tipo_de_escama = tipo_de_escama;
+    public getTipoEscamas(): string {
+        return this.tipo_escamas;
     }
 
     /**
-     * Obtém o tipo de escama do réptil.
-     * @returns O tipo de escama atual do réptil.
+     * Define o tipo de escamas do réptil.
+     * 
+     * @param _tipo_escamas O tipo de escamas a ser atribuído ao réptil.
      */
-    public getTipo_de_escama(): string {
-        // Retorna o valor atual da propriedade 'tipo_de_escama'
-        return this.tipo_de_escama;
+    public setTipoEscamas(_tipo_escamas: string): void {
+        this.tipo_escamas = _tipo_escamas;
+    }
+
+    static async listarRepteis() {
+        const listaDeRepteis: Array<Reptil> = [];
+        try {
+            const queryReturn = await database.query(`SELECT * FROM  reptil`);
+            queryReturn.rows.forEach(reptil => {
+                listaDeRepteis.push(reptil);
+            });
+
+            // só pra testar se a lista veio certa do banco
+            console.log(listaDeRepteis);
+
+            return listaDeRepteis;
+        } catch (error) {
+            console.log('Erro no modelo');
+            console.log(error);
+            return "error";
+        }
+    }
+
+    static async cadastrarReptil(reptil: Reptil): Promise<any> {
+        try {
+            let insertResult = false;
+            await database.query(`INSERT INTO reptil (nome, idade, genero, tipo_de_escamas)
+                VALUES
+                ('${reptil.getNome().toUpperCase()}', ${reptil.getIdade()}, '${reptil.getGenero().toUpperCase()}', '${reptil.getTipoEscamas().toUpperCase()}');
+            `).then((result) => {
+                if(result.rowCount != 0) {
+                    insertResult = true;
+                }
+            });
+            return insertResult;
+        } catch(error) {
+            return error;
+        }
     }
 }
