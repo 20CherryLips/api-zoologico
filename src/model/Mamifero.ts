@@ -1,5 +1,8 @@
 // Importa a classe Animal do módulo "./Animal"
 import { Animal } from "./Animal";
+import { DatabaseModel } from "./DatabaseModel";
+
+const database = new DatabaseModel().pool;
 
 /**
  * Classe que representa um mamífero, estendendo a classe Animal.
@@ -40,4 +43,41 @@ export class Mamifero extends Animal {
         // Retorna o valor atual da propriedade 'raca'
         return this.raca;
     }
+
+    static async listarMamiferos() {
+        const listaDeMamiferos: Array<Mamifero> = [];
+        try {
+            const queryReturn = await database.query(`SELECT * FROM  mamifero`);
+            queryReturn.rows.forEach(mamifero => {
+                listaDeMamiferos.push(mamifero);
+            });
+
+            // só pra testar se a lista veio certa do banco
+            console.log(listaDeMamiferos);
+
+            return listaDeMamiferos;
+        } catch (error) {
+            console.log('Erro no modelo');
+            console.log(error);
+            return "error";
+        }
+    }
+
+    static async cadastrarMamiferos(mamifero: Mamifero): Promise<any> {
+        try {
+            let insertResult = false;
+            await database.query(`INSERT INTO mamifero (nome, idade, genero, raca)
+                VALUES
+                ('${mamifero.getNome().toUpperCase()}', ${mamifero.getIdade()}, '${mamifero.getGenero().toUpperCase()}', '${mamifero.getRaca().toUpperCase()}');
+            `).then((result) => {
+                if(result.rowCount != 0) {
+                    insertResult = true;
+                }
+            });
+            return insertResult;
+        } catch(error) {
+            return error;
+        }
+    }
 }
+
