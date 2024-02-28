@@ -1,81 +1,135 @@
+import { DatabaseModel } from "./DatabaseModel";
+
 /**
- * Classe que representa um animal.
+ * Pool de conexão do banco de dados
+ */
+const database = new DatabaseModel().pool;
+
+/**
+ * Representa um animal no zoológico.
  */
 export class Animal {
 
-    // Propriedade privada para armazenar o nome do animal
-    private nome: string;
-
-    // Propriedade privada para armazenar a idade do animal
-    private idade: number;
-
-    // Propriedade privada para armazenar o gênero do animal
-    private genero: string;
+    /**
+     * O nome do animal.
+     */
+    private nomeAnimal: string;
 
     /**
-     * Construtor da classe Animal.
-     * @param _nome - O nome do animal.
-     * @param _idade - A idade do animal.
-     * @param _genero - O gênero do animal.
+     * A idade do animal.
      */
-    constructor(_nome: string, _idade: number, _genero: string) {
-        // Inicializa as propriedades com os valores passados como parâmetros
-        this.nome = _nome;
-        this.idade = _idade;
-        this.genero = _genero;
-    }
+    private idadeAnimal: number;
 
     /**
-     * Define o nome do animal.
-     * @param _nome - O novo nome a ser atribuído ao animal.
+     * O gênero do animal (ex: "macho", "fêmea", "desconhecido").
      */
-    public setNome(_nome: string): void {
-        // Atribui o novo valor do nome à propriedade 'nome'
-        this.nome = _nome;
+    private generoAnimal: string;
+
+    /**
+     * Cria uma nova instância de Animal.
+     * 
+     * @param _nome O nome do animal.
+     * @param _idade A idade do animal.
+     * @param _genero O gênero do animal.
+     */
+    constructor(_nome: string,
+        _idade: number,
+        _genero: string) {
+        this.nomeAnimal = _nome;
+        this.idadeAnimal = _idade;
+        this.generoAnimal = _genero;
     }
 
     /**
      * Obtém o nome do animal.
-     * @returns O nome atual do animal.
+     * 
+     * @returns O nome do animal.
      */
-    public getNome(): string {
-        // Retorna o valor atual da propriedade 'nome'
-        return this.nome;
+    public getNomeAnimal(): string {
+        return this.nomeAnimal;
     }
 
     /**
-     * Define a idade do animal.
-     * @param _idade - A nova idade a ser atribuída ao animal.
+     * Define o nome do animal.
+     * 
+     * @param nome O nome a ser atribuído ao animal.
      */
-    public setIdade(_idade: number): void {
-        // Atribui o novo valor da idade à propriedade 'idade'
-        this.idade = _idade;
+    public setNomeAnimal(nome: string): void {
+        this.nomeAnimal = nome;
     }
 
     /**
      * Obtém a idade do animal.
-     * @returns A idade atual do animal.
+     * 
+     * @returns A idade do animal.
      */
-    public getIdade(): number {
-        // Retorna o valor atual da propriedade 'idade'
-        return this.idade;
+    public getIdadeAnimal(): number {
+        return this.idadeAnimal;
     }
 
     /**
-     * Define o gênero do animal.
-     * @param _genero - O novo gênero a ser atribuído ao animal.
+     * Define a idade do animal.
+     * 
+     * @param idade A idade a ser atribuída ao animal.
      */
-    public setGenero(_genero: string): void {
-        // Atribui o novo valor do gênero à propriedade 'genero'
-        this.genero = _genero;
+    public setIdadeAnimal(idade: number): void {
+        this.idadeAnimal = idade;
     }
 
     /**
      * Obtém o gênero do animal.
-     * @returns O gênero atual do animal.
+     * 
+     * @returns O gênero do animal.
      */
-    public getGenero(): string {
-        // Retorna o valor atual da propriedade 'genero'
-        return this.genero;
+    public getGeneroAnimal(): string {
+        return this.generoAnimal;
+    }
+
+    /**
+     * Define o gênero do animal.
+     * 
+     * @param genero O gênero a ser atribuído ao animal.
+     */
+    public setGeneroAnimal(genero: string): void {
+        this.generoAnimal = genero;
+    }
+
+    /**
+     * Retorna uma lista com todos os animais cadastrados no sistema.
+     * @returns lista com os animais cadastrados no sistema
+     */
+    static async listarTodosAnimais(): Promise<any> {
+        try {
+            // Query para a consulta no banco de dados
+            const selectAllQuery = `SELECT
+                                        a.idAnimal,
+                                        a.nomeAnimal,
+                                        a.idadeAnimal,
+                                        a.generoAnimal,
+                                        CASE
+                                            WHEN av.idAve IS NOT NULL THEN 'Ave'
+                                            WHEN m.idMamifero IS NOT NULL THEN 'Mamifero'
+                                            WHEN r.idReptil IS NOT NULL THEN 'Reptil'
+                                        END AS tipoAnimal,
+                                        av.envergadura,
+                                        m.especie,
+                                        r.tipoDeEscamas
+                                    FROM
+                                        Animal a
+                                    LEFT JOIN
+                                        Ave av ON a.idAnimal = av.idAve
+                                    LEFT JOIN
+                                        Mamifero m ON a.idAnimal = m.idMamifero
+                                    LEFT JOIN
+                                        Reptil r ON a.idAnimal = r.idReptil;
+            `
+            // Executa a query e retorna o resultado para quem chamou a função
+            return await database.query(selectAllQuery);
+        } catch (error) {
+            // Caso dê algum erro na query do banco, é lançado o erro para quem chamou a função
+            console.log('Erro no modelo');
+            console.log(error);
+            return "error, verifique os logs do servidor";
+        }
     }
 }
